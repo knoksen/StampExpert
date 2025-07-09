@@ -11,7 +11,9 @@ Start a local server with:
 npm run start
 ```
 
-This serves the content in the `public/` directory so you can open the interface in your browser.
+The command runs `live-server` against the `public/` folder. Once it starts you
+can open [http://localhost:8080](http://localhost:8080) (or the URL shown in the
+terminal) in your browser to use the app.
 
 ## Build
 Create a production build in the `dist/` directory with:
