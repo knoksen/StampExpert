@@ -4,9 +4,13 @@
   "description": "StampExpert static site",
   "scripts": {
     "start": "npx live-server public",
-    "build": "rm -rf dist && mkdir dist && cp -r public/* dist/ && cp -r src dist/"
+    "build": "rm -rf dist && mkdir dist && cp -r public/* dist/ && cp -r src dist/",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.js\""
   },
   "devDependencies": {
+    "eslint": "^8.57.1",
+    "jest": "^30.0.4",
     "live-server": "^1.2.1"
   }
 }

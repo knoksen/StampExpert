@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancelBtn');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const resultsContainer = document.getElementById('resultsContainer');
-    const collectionContainer = document.getElementById('collectionContainer');
     const emptyCollection = document.getElementById('emptyCollection');
     const stampCollection = document.getElementById('stampCollection');
     const saveBtn = document.getElementById('saveBtn');
