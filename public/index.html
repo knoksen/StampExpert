@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Stamp Recognizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../src/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-800 mb-4">Expert Stamp Recognizer</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Identify and catalog stamps from around the world with our advanced recognition system.
+                Discover rarity, origin, and historical significance of your stamp collection.
+            </p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Upload Section -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Upload Your Stamp</h2>
+                
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-6" id="dropZone">
+                    <div id="uploadArea">
+                        <i class="fas fa-stamp text-5xl text-blue-500 mb-4"></i>
+                        <p class="text-gray-500 mb-4">Drag & drop your stamp image here</p>
+                        <p class="text-sm text-gray-400 mb-4">or</p>
+                        <input type="file" id="stampUpload" accept="image/*" class="hidden">
+                        <label for="stampUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg cursor-pointer transition">
+                            Browse Files
+                        </label>
+                    </div>
+                    
+                    <div id="previewArea" class="hidden">
+                        <img id="previewImage" src="" alt="Stamp Preview" class="w-full mb-4">
+                        <button id="analyzeBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
+                            Analyze Stamp
+                        </button>
+                        <button id="cancelBtn" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="loadingIndicator" class="hidden text-center py-8">
+                    <i class="fas fa-circle-notch loading-spinner text-4xl text-blue-500 mb-4"></i>
+                    <p class="text-gray-600">Analyzing your stamp...</p>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="lg:col-span-2">
+                <div id="resultsContainer" class="hidden bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Stamp Analysis Results</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-medium text-gray-700 mb-2">Basic Information</h3>
+                            <div class="space-y-2">
+                                <p><span class="font-medium">Country:</span> <span id="country">-</span></p>
+                                <p><span class="font-medium">Year Issued:</span> <span id="year">-</span></p>
+                                <p><span class="font-medium">Denomination:</span> <span id="denomination">-</span></p>
+                                <p><span class="font-medium">Catalog Number:</span> <span id="catalogNumber">-</span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-medium text-gray-700 mb-2">Rarity & Value</h3>
+                            <div class="space-y-2">
+                                <p><span class="font-medium">Rarity:</span> <span id="rarity" class="px-2 py-1 rounded-full text-xs font-medium">-</span></p>
+                                <p><span class="font-medium">Condition:</span> <span id="condition">-</span></p>
+                                <p><span class="font-medium">Estimated Value:</span> <span id="value">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-medium text-gray-700 mb-2">Historical Context</h3>
+                        <p id="description" class="text-gray-600">No description available.</p>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <button id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+                            <i class="fas fa-save mr-2"></i> Save to Collection
+                        </button>
+                        <button id="newAnalysisBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
+                            <i class="fas fa-redo mr-2"></i> Analyze Another
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stamp Collection -->
+                <div id="collectionContainer" class="mt-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Your Stamp Collection</h2>
+                        <div class="flex space-x-2">
+                            <select id="filterCountry" class="border rounded-lg px-3 py-2 text-sm">
+                                <option value="">All Countries</option>
+                                <option value="USA">USA</option>
+                                <option value="UK">UK</option>
+                                <option value="France">France</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Japan">Japan</option>
+                            </select>
+                            <select id="filterRarity" class="border rounded-lg px-3 py-2 text-sm">
+                                <option value="">All Rarities</option>
+                                <option value="common">Common</option>
+                                <option value="uncommon">Uncommon</option>
+                                <option value="rare">Rare</option>
+                                <option value="ultra-rare">Ultra Rare</option>
+                                <option value="legendary">Legendary</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="emptyCollection" class="text-center py-12 bg-white rounded-xl shadow">
+                        <i class="fas fa-stamp text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Your collection is empty. Upload a stamp to get started!</p>
+                    </div>
+                    
+                    <div id="stampCollection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+                        <!-- Stamp cards will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../src/app.js"></script>
+</body>
+</html>
