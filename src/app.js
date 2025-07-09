@@ -149,15 +149,35 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Analyze button
-    analyzeBtn.addEventListener('click', function() {
+    analyzeBtn.addEventListener('click', async function() {
+        if (!stampUpload.files.length) {
+            alert('Please upload a stamp image first.');
+            return;
+        }
+
+        const file = stampUpload.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
         previewArea.classList.add('hidden');
         loadingIndicator.classList.remove('hidden');
-        
-        // Simulate API call with timeout
-        setTimeout(function() {
-            loadingIndicator.classList.add('hidden');
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+            console.log('Analysis result', data);
             showRandomStampResult();
-        }, 2000);
+        } catch (err) {
+            console.error('Failed to analyze stamp', err);
+            alert('Failed to analyze stamp.');
+        } finally {
+            loadingIndicator.classList.add('hidden');
+        }
     });
     
     // Show a random stamp result (simulating recognition)
