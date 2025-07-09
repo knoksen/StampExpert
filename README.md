@@ -11,7 +11,9 @@ Start a local development server that serves the files in `public/` with:
 npm run start
 ```
 
-This serves the content in the `public/` directory so you can open the interface in your browser.
+The command runs `live-server` against the `public/` folder. Once it starts you
+can open [http://localhost:8080](http://localhost:8080) (or the URL shown in the
+terminal) in your browser to use the app.
 
 You can also run the Node.js API server which serves the same static files and exposes a stub `/api/analyze` endpoint:
 

@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "StampExpert static site",
   "scripts": {
-    "start": "npx live-server public",
-    "build": "rm -rf dist && mkdir dist && cp -r public/* dist/ && cp -r src dist/",
-    "server": "node server.js"
   },
   "devDependencies": {
     "live-server": "^1.2.1"
