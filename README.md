@@ -19,3 +19,6 @@ Create a production build in the `dist/` directory with:
 ```bash
 npm run build
 ```
+
+This command runs `node build.js` to copy the `public` and `src` files into
+`dist/` and adjust paths in `index.html`.
