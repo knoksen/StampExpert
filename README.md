@@ -19,3 +19,12 @@ Create a production build in the `dist/` directory with:
 ```bash
 npm run build
 ```
+
+## Tests
+Run the automated test suite with:
+
+```bash
+npm test
+```
+
+The command launches Jest, which starts the server and checks that the `/api/analyze` endpoint returns the placeholder JSON response.
