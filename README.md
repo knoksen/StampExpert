@@ -20,7 +20,11 @@ Create a production build in the `dist/` directory with:
 npm run build
 ```
 
-## Tests
+
+This command runs `node build.js` to copy the `public` and `src` files into
+`dist/` and adjust paths in `index.html`.
+=======
+
 Run the automated test suite with:
 
 ```bash
@@ -28,3 +32,4 @@ npm test
 ```
 
 The command launches Jest, which starts the server and checks that the `/api/analyze` endpoint returns the placeholder JSON response.
+

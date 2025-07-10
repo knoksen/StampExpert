@@ -4,6 +4,7 @@
   "description": "StampExpert static site",
   "scripts": {
     "start": "node server.js",
+    "build": "node build.js"
     "build": "rm -rf dist && mkdir dist && cp -r public/* dist/ && cp -r src dist/",
     "test": "jest"
   },
