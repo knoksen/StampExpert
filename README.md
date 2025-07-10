@@ -20,6 +20,7 @@ Create a production build in the `dist/` directory with:
 npm run build
 ```
 
+
 ## Configuration
 
 The server can be configured via environment variables:
@@ -44,3 +45,18 @@ You can also build a Docker image using the provided `Dockerfile`:
 docker build -t stampexpert .
 docker run -p 8080:8080 -e PORT=8080 stampexpert
 ```
+
+
+This command runs `node build.js` to copy the `public` and `src` files into
+`dist/` and adjust paths in `index.html`.
+
+
+Run the automated test suite with:
+
+```bash
+npm test
+```
+
+The command launches Jest, which starts the server and checks that the `/api/analyze` endpoint returns the placeholder JSON response.
+
+
