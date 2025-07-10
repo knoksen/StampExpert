@@ -5,10 +5,16 @@
   "scripts": {
     "start": "node server.js",
     "build": "rm -rf dist && mkdir dist && cp -r public/* dist/ && cp -r src dist/",
+
     "test": "node test/placeholder.test.js"
+
+    "test": "jest --runInBand"
+
   },
   "devDependencies": {
-    "live-server": "^1.2.1"
+    "jest": "^30.0.4",
+    "live-server": "^1.2.1",
+    "supertest": "^7.1.3"
   },
   "dependencies": {
     "express": "^4.21.2"
