@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 
+// Configuration via environment variables:
+//   PORT - port number for the HTTP server (defaults to 3000)
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
