@@ -24,6 +24,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// CORS configuration for API endpoints
+app.use('/api', (req, res, next) => {
+  const allowedOrigins = process.env.ALLOWED_ORIGINS ? 
+    process.env.ALLOWED_ORIGINS.split(',') : 
+    ['http://localhost:3000', 'http://127.0.0.1:3000'];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || !isProduction) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
 // Static file serving with cache headers
 const staticOptions = isProduction ? { maxAge: '1d' } : {};
 app.use(express.static(path.join(__dirname, 'public'), staticOptions));
@@ -41,6 +63,7 @@ app.get('/health', (req, res) => {
 app.post('/api/analyze', (req, res) => {
   try {
     // For now just return a placeholder response
+    // In a real implementation, add file type and size validation
     res.json({ success: true, message: 'Analysis pending implementation' });
   } catch (error) {
     console.error('Error in /api/analyze:', error);

@@ -16,7 +16,15 @@ afterAll(() => {
 });
 
 describe('POST /api/analyze', () => {
-  it('returns status 200 and placeholder JSON', async () => {
+  it('returns status 200 and placeholder JSON with valid data', async () => {
+    const res = await request('http://localhost:3000')
+      .post('/api/analyze')
+      .send({ data: 'test' });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, message: 'Analysis pending implementation' });
+  });
+
+  it('returns status 200 even with empty JSON (current behavior)', async () => {
     const res = await request('http://localhost:3000')
       .post('/api/analyze')
       .send({});

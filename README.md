@@ -28,8 +28,15 @@ The server can be configured via environment variables:
 | Variable | Description | Default |
 | -------- | ----------- | ------- |
 | `PORT`   | Port that the HTTP server listens on | `3000` |
+| `NODE_ENV` | Environment mode (development/production) | `development` |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `http://localhost:3000,http://127.0.0.1:3000` |
 
 Set these variables before starting the application if you need to override the defaults.
+
+Example:
+```bash
+NODE_ENV=production PORT=8080 ALLOWED_ORIGINS=https://yourdomain.com node server.js
+```
 
 ## Production Deployment
 
