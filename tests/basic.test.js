@@ -20,3 +20,15 @@ describe('GET /', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('GET /health', () => {
+  it('responds with health check data', async () => {
+    const res = await request('http://localhost:3000').get('/health');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      status: 'healthy',
+      timestamp: expect.any(String),
+      uptime: expect.any(Number)
+    });
+  });
+});

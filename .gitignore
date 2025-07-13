@@ -1,4 +1,10 @@
 node_modules/
-
 dist/
-
+*.log
+npm-debug.log*
+.env
+.env.local
+.env.production
+.DS_Store
+Thumbs.db
+coverage/
