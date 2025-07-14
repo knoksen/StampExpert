@@ -28,8 +28,15 @@ The server can be configured via environment variables:
 | Variable | Description | Default |
 | -------- | ----------- | ------- |
 | `PORT`   | Port that the HTTP server listens on | `3000` |
+| `NODE_ENV` | Environment mode (development/production) | `development` |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `http://localhost:3000,http://127.0.0.1:3000` |
 
 Set these variables before starting the application if you need to override the defaults.
+
+Example:
+```bash
+NODE_ENV=production PORT=8080 ALLOWED_ORIGINS=https://yourdomain.com node server.js
+```
 
 ## Production Deployment
 
@@ -43,8 +50,34 @@ You can also build a Docker image using the provided `Dockerfile`:
 
 ```bash
 docker build -t stampexpert .
-docker run -p 8080:8080 -e PORT=8080 stampexpert
+docker run -p 8080:8080 -e PORT=8080 -e NODE_ENV=production stampexpert
 ```
+
+### Health Check
+
+The application includes a health check endpoint at `/health` for monitoring:
+
+```bash
+curl http://localhost:3000/health
+```
+
+Response:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2023-01-01T00:00:00.000Z",
+  "uptime": 123.456
+}
+```
+
+### Security Features
+
+The application includes production-ready security features:
+- Security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
+- HTTPS Strict Transport Security (in production mode)
+- Request size limits (10MB)
+- Graceful shutdown handling
+- Error handling middleware
 
 
 This command runs `node build.js` to copy the `public` and `src` files into
