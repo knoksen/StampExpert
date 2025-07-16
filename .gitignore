@@ -8,3 +8,11 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 coverage/
+
+# Electron build artifacts
+build/
+out/
+
+# Temporary files
+/tmp/
+.tmp/
