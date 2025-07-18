@@ -1,13 +1,59 @@
 {
   "name": "stampexpert",
   "version": "1.0.0",
-  "description": "StampExpert static site",
+  "description": "StampExpert Desktop - Identify and catalog stamps with advanced recognition",
+  "main": "main.js",
+  "homepage": "./",
   "scripts": {
     "start": "node server.js",
+    "electron": "electron .",
+    "electron-dev": "NODE_ENV=development electron .",
     "build": "node build.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "dist": "electron-builder",
+    "dist-win": "electron-builder --win",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.stampexpert.desktop",
+    "productName": "StampExpert",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "build.js",
+      "public/**/*",
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true
+    },
+    "publish": null
   },
   "devDependencies": {
+    "electron": "^37.2.2",
+    "electron-builder": "^26.0.12",
     "jest": "^30.0.4",
     "live-server": "^1.2.1",
     "supertest": "^7.1.3"

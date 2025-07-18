@@ -1,10 +1,41 @@
 # StampExpert
+
 Identify and catalog stamps from around the world with our advanced recognition system. Discover rarity, origin, and historical significance of your stamp collection.
 
-## Installation
+**🖥️ Now available as a Windows 10 Desktop Application!**
+
+## Platforms
+
+- **Desktop Application** - Native Windows 10 app with enhanced features
+- **Web Application** - Browser-based version for any platform
+
+## Desktop Application (Windows 10)
+
+### Installation
+1. Download `StampExpert-Setup-1.0.0.exe` from releases
+2. Run the installer
+3. Launch from Start Menu or Desktop
+
+### Features
+- Native Windows 10 integration
+- Offline capability
+- Enhanced performance
+- System integration (file associations, notifications)
+- Desktop shortcuts and menu integration
+
+### Development
+```bash
+npm install
+npm run electron-dev    # Run desktop app in development
+npm run dist-win       # Build Windows installer
+```
+
+## Web Application
+
+### Installation
 Run `npm install` to install development dependencies.
 
-## Development
+### Development
 Start the application server from the project root with:
 
 ```bash
