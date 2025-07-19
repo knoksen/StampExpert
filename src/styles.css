@@ -24,6 +24,8 @@
 #previewImage {
     max-height: 300px;
     object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 .loading-spinner {
     animation: spin 1s linear infinite;
@@ -31,4 +33,108 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Enhanced drag and drop styles */
+#dropZone {
+    transition: all 0.3s ease;
+}
+#dropZone.border-blue-500 {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+    transform: scale(1.02);
+}
+
+/* Better button styles */
+button {
+    transition: all 0.2s ease;
+}
+button:hover {
+    transform: translateY(-1px);
+}
+button:active {
+    transform: translateY(0);
+}
+
+/* Improved collection grid */
+#stampCollection {
+    animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Better modal/alert styles */
+.alert {
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Enhanced image upload area */
+#uploadArea {
+    transition: all 0.3s ease;
+}
+#uploadArea:hover {
+    background-color: #f9fafb;
+}
+
+/* Better responsive design */
+@media (max-width: 768px) {
+    .stamp-card {
+        transform: none;
+    }
+    .stamp-card:hover {
+        transform: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+}
+
+/* Improved keyboard focus styles */
+button:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Better loading indicator */
+#loadingIndicator {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Enhanced technical analysis cards */
+.bg-blue-50, .bg-green-50, .bg-yellow-50 {
+    transition: all 0.3s ease;
+}
+.bg-blue-50:hover, .bg-green-50:hover, .bg-yellow-50:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Improved collection empty state */
+#emptyCollection {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Better scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

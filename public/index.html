@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,22 +14,23 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        
+
         body.desktop-app .selectable {
             user-select: text;
             -webkit-user-select: text;
         }
-        
+
         .window-controls {
             -webkit-app-region: no-drag;
         }
-        
+
         .title-bar {
             -webkit-app-region: drag;
             height: 30px;
         }
     </style>
 </head>
+
 <body class="bg-gray-100 min-h-screen desktop-app">
     <!-- Desktop title bar (for frameless window if needed) -->
     <div class="title-bar bg-blue-800 text-white text-sm px-4 py-1 flex justify-between items-center hidden">
@@ -60,14 +62,15 @@
             <!-- Upload Section -->
             <div class="lg:col-span-1 bg-white rounded-xl shadow-md p-6">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-6">Upload Your Stamp</h2>
-                
+
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-6" id="dropZone">
                     <div id="uploadArea">
                         <i class="fas fa-stamp text-5xl text-blue-500 mb-4"></i>
                         <p class="text-gray-500 mb-4">Drag & drop your stamp image here</p>
                         <p class="text-sm text-gray-400 mb-4">or</p>
                         <input type="file" id="stampUpload" accept="image/*" class="hidden">
-                        <label for="stampUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg cursor-pointer transition">
+                        <label for="stampUpload"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg cursor-pointer transition">
                             Browse Files
                         </label>
                         <div class="mt-4 text-xs text-gray-400">
@@ -75,18 +78,20 @@
                             Supports JPG, PNG • Max 10MB
                         </div>
                     </div>
-                    
+
                     <div id="previewArea" class="hidden">
                         <img id="previewImage" src="" alt="Stamp Preview" class="w-full mb-4">
-                        <button id="analyzeBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
+                        <button id="analyzeBtn"
+                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
                             <i class="fas fa-search mr-2"></i>Analyze Stamp
                         </button>
-                        <button id="cancelBtn" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
+                        <button id="cancelBtn"
+                            class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
                             <i class="fas fa-times mr-2"></i>Cancel
                         </button>
                     </div>
                 </div>
-                
+
                 <div id="loadingIndicator" class="hidden text-center py-8">
                     <i class="fas fa-circle-notch loading-spinner text-4xl text-blue-500 mb-4"></i>
                     <p class="text-gray-600">Analyzing your stamp...</p>
@@ -99,20 +104,21 @@
                         <i class="fas fa-keyboard mr-2"></i>Keyboard Shortcuts
                     </h3>
                     <div class="text-sm text-blue-700 space-y-1">
-                        <div><kbd class="bg-white px-2 py-1 rounded border">Ctrl+N</kbd> New Analysis</div>
-                        <div><kbd class="bg-white px-2 py-1 rounded border">Ctrl+O</kbd> View Collection</div>
+                        <div><kbd class="bg-white px-2 py-1 rounded border">Ctrl+O</kbd> Open Image</div>
+                        <div><kbd class="bg-white px-2 py-1 rounded border">Ctrl+E</kbd> Export Collection</div>
+                        <div><kbd class="bg-white px-2 py-1 rounded border">Esc</kbd> Cancel/Reset</div>
                         <div><kbd class="bg-white px-2 py-1 rounded border">F11</kbd> Fullscreen</div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Results Section -->
             <div class="lg:col-span-2">
                 <div id="resultsContainer" class="hidden bg-white rounded-xl shadow-md p-6">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-6">
                         <i class="fas fa-chart-line mr-2"></i>Stamp Analysis Results
                     </h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-medium text-gray-700 mb-2">
@@ -122,55 +128,126 @@
                                 <p><span class="font-medium">Country:</span> <span id="country">-</span></p>
                                 <p><span class="font-medium">Year Issued:</span> <span id="year">-</span></p>
                                 <p><span class="font-medium">Denomination:</span> <span id="denomination">-</span></p>
-                                <p><span class="font-medium">Catalog Number:</span> <span id="catalogNumber">-</span></p>
+                                <p><span class="font-medium">Catalog Number:</span> <span id="catalogNumber">-</span>
+                                </p>
                             </div>
                         </div>
-                        
+
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-medium text-gray-700 mb-2">
                                 <i class="fas fa-gem mr-2"></i>Rarity & Value
                             </h3>
                             <div class="space-y-2 selectable">
-                                <p><span class="font-medium">Rarity:</span> <span id="rarity" class="px-2 py-1 rounded-full text-xs font-medium">-</span></p>
+                                <p><span class="font-medium">Rarity:</span> <span id="rarity"
+                                        class="px-2 py-1 rounded-full text-xs font-medium">-</span></p>
                                 <p><span class="font-medium">Condition:</span> <span id="condition">-</span></p>
                                 <p><span class="font-medium">Estimated Value:</span> <span id="value">-</span></p>
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Technical Analysis Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-blue-800 mb-2">
+                                <i class="fas fa-percentage mr-2"></i>Confidence
+                            </h4>
+                            <p class="text-2xl font-bold" id="confidence">-</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-green-800 mb-2">
+                                <i class="fas fa-expand-arrows-alt mr-2"></i>Dimensions
+                            </h4>
+                            <p class="text-sm" id="dimensions">-</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h4 class="font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-image mr-2"></i>Image Quality
+                            </h4>
+                            <p class="text-sm" id="imageQuality">-</p>
+                        </div>
+                    </div>
+
                     <div class="mb-6">
                         <h3 class="font-medium text-gray-700 mb-2">
                             <i class="fas fa-book mr-2"></i>Historical Context
                         </h3>
                         <p id="description" class="text-gray-600 selectable">No description available.</p>
                     </div>
-                    
+
                     <div class="flex justify-between items-center">
-                        <button id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+                        <button id="saveBtn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
                             <i class="fas fa-save mr-2"></i> Save to Collection
                         </button>
-                        <button id="newAnalysisBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
+                        <button id="newAnalysisBtn"
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition">
                             <i class="fas fa-redo mr-2"></i> Analyze Another
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Stamp Collection -->
                 <div id="collectionContainer" class="mt-8">
+                    <!-- Collection Statistics -->
+                    <div id="collectionStats" class="hidden mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-blue-600">Total Stamps</p>
+                                    <p class="text-2xl font-bold text-blue-900" id="totalStamps">0</p>
+                                </div>
+                                <i class="fas fa-stamp text-blue-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-green-600">Countries</p>
+                                    <p class="text-2xl font-bold text-green-900" id="totalCountries">0</p>
+                                </div>
+                                <i class="fas fa-globe text-green-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-purple-600">Rare Stamps</p>
+                                    <p class="text-2xl font-bold text-purple-900" id="rareStamps">0</p>
+                                </div>
+                                <i class="fas fa-gem text-purple-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-yellow-600">Est. Value</p>
+                                    <p class="text-lg font-bold text-yellow-900" id="totalValue">$0</p>
+                                </div>
+                                <i class="fas fa-dollar-sign text-yellow-500 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold text-gray-800">
                             <i class="fas fa-folder-open mr-2"></i>Your Stamp Collection
                         </h2>
                         <div class="flex space-x-2">
-                            <select id="filterCountry" class="border rounded-lg px-3 py-2 text-sm">
+                            <select id="filterCountry" class="border rounded-lg px-3 py-2 text-sm"
+                                title="Filter by country">
                                 <option value="">All Countries</option>
-                                <option value="USA">USA</option>
-                                <option value="UK">UK</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Brazil">Brazil</option>
+                                <option value="Canada">Canada</option>
                                 <option value="France">France</option>
                                 <option value="Germany">Germany</option>
                                 <option value="Japan">Japan</option>
+                                <option value="UK">UK</option>
+                                <option value="USA">USA</option>
                             </select>
-                            <select id="filterRarity" class="border rounded-lg px-3 py-2 text-sm">
+                            <select id="filterRarity" class="border rounded-lg px-3 py-2 text-sm"
+                                title="Filter by rarity">
                                 <option value="">All Rarities</option>
                                 <option value="common">Common</option>
                                 <option value="uncommon">Uncommon</option>
@@ -178,9 +255,20 @@
                                 <option value="ultra-rare">Ultra Rare</option>
                                 <option value="legendary">Legendary</option>
                             </select>
+                            <button onclick="exportCollection()"
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition"
+                                title="Export collection">
+                                <i class="fas fa-download mr-1"></i> Export
+                            </button>
+                            <label
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm transition cursor-pointer"
+                                title="Import collection">
+                                <i class="fas fa-upload mr-1"></i> Import
+                                <input type="file" accept=".json" onchange="importCollection(event)" class="hidden">
+                            </label>
                         </div>
                     </div>
-                    
+
                     <div id="emptyCollection" class="text-center py-12 bg-white rounded-xl shadow">
                         <i class="fas fa-stamp text-4xl text-gray-300 mb-4"></i>
                         <p class="text-gray-500">Your collection is empty. Upload a stamp to get started!</p>
@@ -189,7 +277,7 @@
                             Tip: Use Ctrl+N to quickly start a new analysis
                         </div>
                     </div>
-                    
+
                     <div id="stampCollection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
                         <!-- Stamp cards will be added here dynamically -->
                     </div>
@@ -201,15 +289,15 @@
     <script src="../src/app.js"></script>
     <script>
         // Desktop-specific enhancements
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Add desktop-specific keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey && e.key === 'n') {
                     e.preventDefault();
-                    document.getElementById('newAnalysisBtn')?.click() || 
-                    document.getElementById('cancelBtn')?.click();
+                    document.getElementById('newAnalysisBtn')?.click() ||
+                        document.getElementById('cancelBtn')?.click();
                 }
-                
+
                 if (e.ctrlKey && e.key === 'o') {
                     e.preventDefault();
                     document.getElementById('collectionContainer')?.scrollIntoView({ behavior: 'smooth' });
@@ -222,4 +310,5 @@
         });
     </script>
 </body>
+
 </html>
