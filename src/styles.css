@@ -138,3 +138,230 @@ select:focus {
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+/* ========== ADVANCED FEATURES STYLING ========== */
+
+/* Analytics Dashboard */
+.analytics-panel {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #e2e8f0;
+}
+
+.value-progress {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    transition: width 0.8s ease-in-out;
+    border-radius: 2px;
+}
+
+.country-progress {
+    background: linear-gradient(90deg, #10b981, #059669);
+    transition: width 0.8s ease-in-out;
+    border-radius: 2px;
+}
+
+.year-bar {
+    transition: all 0.3s ease;
+    background: linear-gradient(to top, #8b5cf6, #7c3aed);
+    border-radius: 2px 2px 0 0;
+    cursor: pointer;
+}
+
+.year-bar:hover {
+    background: linear-gradient(to top, #7c3aed, #6d28d9);
+    transform: scaleY(1.1);
+}
+
+/* Wishlist Styling */
+.wishlist-section {
+    background: linear-gradient(135deg, #fef7ff 0%, #f3e8ff 100%);
+    border: 2px dashed #d8b4fe;
+}
+
+.wishlist-item {
+    background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+    border: 2px solid #fbbf24;
+    transition: all 0.3s ease;
+}
+
+.wishlist-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+    border-color: #f59e0b;
+}
+
+/* Modal Enhancements */
+.modal-backdrop {
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Batch Selection */
+.batch-actions-bar {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-left: 4px solid #3b82f6;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Search and Filters */
+.search-input {
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    transform: scale(1.01);
+}
+
+.filter-select {
+    transition: all 0.2s ease;
+}
+
+.filter-select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+/* Toast Notifications */
+.toast-notification {
+    animation: toastSlideIn 0.3s ease-out;
+    backdrop-filter: blur(4px);
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Enhanced Statistics Cards */
+.stat-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e1;
+}
+
+/* Loading States */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* View Toggle Animation */
+.view-toggle {
+    transition: all 0.3s ease;
+}
+
+.view-toggle:hover {
+    background-color: #e5e7eb;
+    transform: scale(1.05);
+}
+
+/* Enhanced Accessibility */
+.focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .stamp-card {
+        break-inside: avoid;
+        border: 1px solid #000;
+        margin-bottom: 1rem;
+    }
+    
+    .analytics-panel,
+    .wishlist-section {
+        display: none;
+    }
+}
+
+/* Mobile Enhancements */
+@media (max-width: 768px) {
+    .stamp-card:hover {
+        transform: none;
+    }
+    
+    .modal-content {
+        margin: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .analytics-panel {
+        padding: 1rem;
+    }
+}
+
+/* Dark Mode Support (Future Enhancement) */
+@media (prefers-color-scheme: dark) {
+    .stat-card {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        color: #f9fafb;
+        border-color: #374151;
+    }
+    
+    .analytics-panel {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        border-color: #374151;
+    }
+}
+
+/* High DPI Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .stamp-card img {
+        image-rendering: -webkit-optimize-contrast;
+    }
+}

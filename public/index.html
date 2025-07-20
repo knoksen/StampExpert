@@ -229,11 +229,77 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center mb-6">
+                    <!-- Advanced Analytics Dashboard -->
+                    <div id="analyticsPanel" class="hidden bg-white rounded-lg shadow-lg p-6 mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800">
+                                <i class="fas fa-chart-bar mr-2"></i>Collection Analytics
+                            </h3>
+                            <button id="toggleAnalytics" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                <i class="fas fa-chart-line mr-1"></i> View Analytics
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Value Distribution Chart -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-lg font-medium text-gray-700 mb-3">Value Distribution</h4>
+                                <div id="valueDistribution" class="space-y-2">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                            
+                            <!-- Country Distribution -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-lg font-medium text-gray-700 mb-3">Top Countries</h4>
+                                <div id="countryDistribution" class="space-y-2">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                            
+                            <!-- Year Timeline -->
+                            <div class="bg-gray-50 rounded-lg p-4 lg:col-span-2">
+                                <h4 class="text-lg font-medium text-gray-700 mb-3">Stamps by Decade</h4>
+                                <div id="yearDistribution" class="flex justify-between items-end h-32 bg-white rounded p-4">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Collection Insights -->
+                        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-lg font-medium text-gray-700 mb-3">Collection Insights</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                <div class="bg-white rounded-lg p-3">
+                                    <div class="text-2xl font-bold text-blue-600" id="avgValue">$0</div>
+                                    <div class="text-sm text-gray-600">Avg. Value</div>
+                                </div>
+                                <div class="bg-white rounded-lg p-3">
+                                    <div class="text-2xl font-bold text-green-600" id="oldestYear">-</div>
+                                    <div class="text-sm text-gray-600">Oldest Stamp</div>
+                                </div>
+                                <div class="bg-white rounded-lg p-3">
+                                    <div class="text-2xl font-bold text-purple-600" id="mostCommonCountry">-</div>
+                                    <div class="text-sm text-gray-600">Top Country</div>
+                                </div>
+                                <div class="bg-white rounded-lg p-3">
+                                    <div class="text-2xl font-bold text-orange-600" id="rarePercentage">0%</div>
+                                    <div class="text-sm text-gray-600">Rare %</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 space-y-4 lg:space-y-0">
                         <h2 class="text-2xl font-semibold text-gray-800">
                             <i class="fas fa-folder-open mr-2"></i>Your Stamp Collection
                         </h2>
-                        <div class="flex space-x-2">
+                        
+                        <!-- Search and Filters -->
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full lg:w-auto">
+                            <input type="text" id="searchInput" placeholder="Search stamps..." 
+                                   class="border rounded-lg px-3 py-2 text-sm w-full sm:w-48" 
+                                   title="Search by country, year, description, etc.">
+                            
                             <select id="filterCountry" class="border rounded-lg px-3 py-2 text-sm"
                                 title="Filter by country">
                                 <option value="">All Countries</option>
@@ -255,6 +321,22 @@
                                 <option value="ultra-rare">Ultra Rare</option>
                                 <option value="legendary">Legendary</option>
                             </select>
+                            
+                            <select id="sortSelect" class="border rounded-lg px-3 py-2 text-sm" title="Sort by">
+                                <option value="dateAdded">Date Added</option>
+                                <option value="country">Country</option>
+                                <option value="year">Year</option>
+                                <option value="value">Value</option>
+                                <option value="rarity">Rarity</option>
+                            </select>
+                            
+                            <button id="viewToggle" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm transition">
+                                <i class="fas fa-list"></i> List View
+                            </button>
+                        </div>
+                        
+                        <!-- Export/Import Actions -->
+                        <div class="flex space-x-2">
                             <button onclick="exportCollection()"
                                 class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition"
                                 title="Export collection">
@@ -266,6 +348,26 @@
                                 <i class="fas fa-upload mr-1"></i> Import
                                 <input type="file" accept=".json" onchange="importCollection(event)" class="hidden">
                             </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Batch Actions Bar -->
+                    <div id="batchActions" class="hidden mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-4">
+                                <input type="checkbox" id="batchSelectAll" class="rounded" title="Select all visible stamps">
+                                <span class="text-sm text-blue-800">
+                                    <span id="selectedCount">0</span> stamps selected
+                                </span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="batchExport()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition">
+                                    <i class="fas fa-download mr-1"></i> Export Selected
+                                </button>
+                                <button onclick="batchDelete()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
+                                    <i class="fas fa-trash-alt mr-1"></i> Delete Selected
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -281,8 +383,66 @@
                     <div id="stampCollection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
                         <!-- Stamp cards will be added here dynamically -->
                     </div>
+
+                    <!-- Wishlist Section -->
+                    <div id="wishlistSection" class="mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg shadow-lg p-6 hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-semibold text-gray-800">
+                                <i class="fas fa-heart mr-2 text-red-500"></i>Wishlist
+                            </h3>
+                            <button id="addToWishlistBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+                                <i class="fas fa-plus mr-1"></i> Add to Wishlist
+                            </button>
+                        </div>
+                        
+                        <div id="wishlistItems" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-lg p-4 shadow-sm border-2 border-dashed border-gray-300 text-center">
+                                <i class="fas fa-plus text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Add stamps you want to find</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div id="wishlistModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Add to Wishlist</h3>
+                <button id="closeWishlistModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="wishlistForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                    <input type="text" id="wishCountry" required class="w-full border rounded-lg px-3 py-2" placeholder="e.g., USA, UK, Germany">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                    <input type="text" id="wishYear" class="w-full border rounded-lg px-3 py-2" placeholder="e.g., 1920, 1920-1930">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="wishDescription" rows="3" class="w-full border rounded-lg px-3 py-2" placeholder="Describe the stamp you're looking for..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Price ($)</label>
+                    <input type="number" id="wishPrice" class="w-full border rounded-lg px-3 py-2" placeholder="0.00" min="0" step="0.01">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelWishlist" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-heart mr-1"></i> Add to Wishlist
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

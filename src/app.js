@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const newAnalysisBtn = document.getElementById('newAnalysisBtn');
     const filterCountry = document.getElementById('filterCountry');
     const filterRarity = document.getElementById('filterRarity');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const viewToggle = document.getElementById('viewToggle');
+    const batchSelectAll = document.getElementById('batchSelectAll');
+    const batchActions = document.getElementById('batchActions');
     
     // Sample database of stamps (in a real app, this would be from an API)
     const stampDatabase = {
@@ -141,8 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // User's collection
+    // User's collection and state
     let userCollection = [];
+    let userWishlist = [];
+    let selectedStamps = new Set();
+    let viewMode = 'grid'; // 'grid' or 'list'
+    let sortBy = 'dateAdded'; // 'dateAdded', 'country', 'value', 'rarity'
     
     // Drag and drop functionality
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -544,37 +553,129 @@ document.addEventListener('DOMContentLoaded', function() {
         stampCollection.classList.remove('hidden');
         document.getElementById('collectionStats').classList.remove('hidden');
         
-        // Filter collection
-        const countryFilter = filterCountry.value.toLowerCase();
-        const rarityFilter = filterRarity.value.toLowerCase();
+        // Apply filters and search
+        let filteredCollection = applyFiltersAndSearch();
         
-        const filteredCollection = userCollection.filter(stamp => {
-            return (countryFilter === '' || stamp.country.toLowerCase().includes(countryFilter)) &&
-                   (rarityFilter === '' || stamp.rarity === rarityFilter);
-        });
+        // Apply sorting
+        filteredCollection = applySorting(filteredCollection);
         
         // Clear current display
         stampCollection.innerHTML = '';
         
-        // Add filtered stamps
+        // Check if we have results after filtering
+        if (filteredCollection.length === 0) {
+            stampCollection.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">No stamps match your current filters.</p>
+                    <button onclick="clearFilters()" class="mt-2 text-blue-600 hover:text-blue-800">Clear Filters</button>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render stamps based on view mode
+        if (viewMode === 'grid') {
+            renderGridView(filteredCollection);
+        } else {
+            renderListView(filteredCollection);
+        }
+    }
+    
+    function applyFiltersAndSearch() {
+        const countryFilter = filterCountry?.value.toLowerCase() || '';
+        const rarityFilter = filterRarity?.value.toLowerCase() || '';
+        const searchTerm = searchInput?.value.toLowerCase() || '';
+        
+        return userCollection.filter(stamp => {
+            // Country filter
+            if (countryFilter && !stamp.country.toLowerCase().includes(countryFilter)) {
+                return false;
+            }
+            
+            // Rarity filter
+            if (rarityFilter && stamp.rarity !== rarityFilter) {
+                return false;
+            }
+            
+            // Search filter
+            if (searchTerm) {
+                const searchableText = [
+                    stamp.country,
+                    stamp.year,
+                    stamp.denomination,
+                    stamp.catalogNumber,
+                    stamp.description,
+                    stamp.condition
+                ].join(' ').toLowerCase();
+                
+                if (!searchableText.includes(searchTerm)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    }
+    
+    function applySorting(collection) {
+        return collection.sort((a, b) => {
+            switch (sortBy) {
+                case 'country':
+                    return a.country.localeCompare(b.country);
+                case 'year':
+                    return parseInt(a.year) - parseInt(b.year);
+                case 'value':
+                    return getStampValue(a) - getStampValue(b);
+                case 'rarity':
+                    const rarityOrder = ['common', 'uncommon', 'rare', 'ultra-rare', 'legendary'];
+                    return rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity);
+                case 'dateAdded':
+                default:
+                    return new Date(b.addedDate) - new Date(a.addedDate);
+            }
+        });
+    }
+    
+    function getStampValue(stamp) {
+        const valueString = stamp.value.replace(/[^\d,-]/g, '');
+        const values = valueString.split('-').map(v => parseInt(v.replace(/,/g, '')));
+        if (values.length >= 2) {
+            return (values[0] + values[1]) / 2;
+        } else if (values.length === 1) {
+            return values[0];
+        }
+        return 0;
+    }
+    
+    function renderGridView(filteredCollection) {
+        stampCollection.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+        
         filteredCollection.forEach(stamp => {
             const stampCard = document.createElement('div');
-            stampCard.className = `stamp-card bg-white rounded-lg shadow overflow-hidden ${getRarityBorderClass(stamp.rarity)}`;
+            stampCard.className = `stamp-card bg-white rounded-lg shadow overflow-hidden ${getRarityBorderClass(stamp.rarity)} ${selectedStamps.has(stamp.userId) ? 'ring-2 ring-blue-500' : ''}`;
             
             const stampImage = stamp.userImage || stamp.image;
             
             stampCard.innerHTML = `
                 <div class="p-4">
                     <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 class="font-semibold text-lg">${stamp.country} ${stamp.denomination}</h3>
-                            <p class="text-sm text-gray-500">${stamp.year} • ${stamp.catalogNumber}</p>
+                        <div class="flex items-center">
+                            <input type="checkbox" class="stamp-checkbox mr-2" data-stamp-id="${stamp.userId}" 
+                                   ${selectedStamps.has(stamp.userId) ? 'checked' : ''}>
+                            <div>
+                                <h3 class="font-semibold text-lg">${stamp.country} ${stamp.denomination}</h3>
+                                <p class="text-sm text-gray-500">${stamp.year} • ${stamp.catalogNumber}</p>
+                            </div>
                         </div>
                         <span class="${getRarityClass(stamp.rarity)} px-2 py-1 rounded-full text-xs font-medium">
                             ${stamp.rarity.charAt(0).toUpperCase() + stamp.rarity.slice(1)}
                         </span>
                     </div>
-                    <img src="${stampImage}" alt="${stamp.country} stamp" class="w-full h-32 object-contain mb-3" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNTBMMTIwIDMwTDEwMCA1MEw4MCAzMEwxMDAgNTBaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K'">
+                    <img src="${stampImage}" alt="${stamp.country} stamp" 
+                         class="w-full h-32 object-contain mb-3 cursor-pointer hover:opacity-80 transition-opacity" 
+                         onclick="showStampDetails('${stamp.userId}')"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNTBMMTIwIDMwTDEwMCA1MEw4MCAzMEwxMDAgNTBaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K'">
                     <div class="flex justify-between items-center text-sm">
                         <span class="font-medium">${stamp.value}</span>
                         <span class="text-gray-500">${stamp.condition}</span>
@@ -582,12 +683,83 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="bg-gray-50 px-4 py-2 flex justify-between items-center border-t">
                     <span class="text-xs text-gray-500">Added: ${new Date(stamp.addedDate).toLocaleDateString()}</span>
-                    <button class="text-red-500 hover:text-red-700 text-sm transition-colors" onclick="removeStamp('${stamp.userId}')" title="Remove from collection">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <div class="flex space-x-2">
+                        <button class="text-blue-500 hover:text-blue-700 text-sm transition-colors" 
+                                onclick="showStampDetails('${stamp.userId}')" title="View details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-red-500 hover:text-red-700 text-sm transition-colors" 
+                                onclick="removeStamp('${stamp.userId}')" title="Remove from collection">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 </div>
             `;
             stampCollection.appendChild(stampCard);
+        });
+        
+        // Add event listeners for checkboxes
+        document.querySelectorAll('.stamp-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', handleStampSelection);
+        });
+    }
+    
+    function renderListView(filteredCollection) {
+        stampCollection.className = 'space-y-4';
+        
+        filteredCollection.forEach(stamp => {
+            const stampCard = document.createElement('div');
+            stampCard.className = `stamp-card bg-white rounded-lg shadow p-4 ${selectedStamps.has(stamp.userId) ? 'ring-2 ring-blue-500' : ''}`;
+            
+            const stampImage = stamp.userImage || stamp.image;
+            
+            stampCard.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <input type="checkbox" class="stamp-checkbox" data-stamp-id="${stamp.userId}" 
+                           ${selectedStamps.has(stamp.userId) ? 'checked' : ''}>
+                    <img src="${stampImage}" alt="${stamp.country} stamp" 
+                         class="w-20 h-16 object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                         onclick="showStampDetails('${stamp.userId}')"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNTBMMTIwIDMwTDEwMCA1MEw4MCAzMEwxMDAgNTBaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K'">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-lg">${stamp.country} ${stamp.denomination}</h3>
+                                <p class="text-sm text-gray-500">${stamp.year} • ${stamp.catalogNumber}</p>
+                                <p class="text-sm text-gray-600 mt-1">${stamp.description}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="${getRarityClass(stamp.rarity)} px-2 py-1 rounded-full text-xs font-medium">
+                                    ${stamp.rarity.charAt(0).toUpperCase() + stamp.rarity.slice(1)}
+                                </span>
+                                <div class="mt-2">
+                                    <div class="font-medium">${stamp.value}</div>
+                                    <div class="text-sm text-gray-500">${stamp.condition}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <button class="text-blue-500 hover:text-blue-700 text-sm transition-colors" 
+                                onclick="showStampDetails('${stamp.userId}')" title="View details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-red-500 hover:text-red-700 text-sm transition-colors" 
+                                onclick="removeStamp('${stamp.userId}')" title="Remove from collection">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-gray-500 border-t pt-2">
+                    Added: ${new Date(stamp.addedDate).toLocaleDateString()}
+                </div>
+            `;
+            stampCollection.appendChild(stampCard);
+        });
+        
+        // Add event listeners for checkboxes
+        document.querySelectorAll('.stamp-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', handleStampSelection);
         });
     }
     
@@ -622,8 +794,251 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Filter change handlers
-    filterCountry.addEventListener('change', updateCollectionDisplay);
-    filterRarity.addEventListener('change', updateCollectionDisplay);
+    filterCountry?.addEventListener('change', updateCollectionDisplay);
+    filterRarity?.addEventListener('change', updateCollectionDisplay);
+    searchInput?.addEventListener('input', debounce(updateCollectionDisplay, 300));
+    sortSelect?.addEventListener('change', function() {
+        sortBy = this.value;
+        updateCollectionDisplay();
+    });
+    viewToggle?.addEventListener('click', function() {
+        viewMode = viewMode === 'grid' ? 'list' : 'grid';
+        this.innerHTML = viewMode === 'grid' ? 
+            '<i class="fas fa-list"></i> List View' : 
+            '<i class="fas fa-th"></i> Grid View';
+        updateCollectionDisplay();
+    });
+    
+    // Batch operations
+    function handleStampSelection(e) {
+        const stampId = e.target.dataset.stampId;
+        if (e.target.checked) {
+            selectedStamps.add(stampId);
+        } else {
+            selectedStamps.delete(stampId);
+        }
+        
+        updateBatchActionsVisibility();
+        updateSelectAllCheckbox();
+    }
+    
+    function updateBatchActionsVisibility() {
+        const batchActionsEl = document.getElementById('batchActions');
+        if (batchActionsEl) {
+            batchActionsEl.classList.toggle('hidden', selectedStamps.size === 0);
+        }
+        
+        const selectedCountEl = document.getElementById('selectedCount');
+        if (selectedCountEl) {
+            selectedCountEl.textContent = selectedStamps.size;
+        }
+    }
+    
+    function updateSelectAllCheckbox() {
+        const selectAllEl = document.getElementById('batchSelectAll');
+        if (selectAllEl) {
+            const visibleStamps = document.querySelectorAll('.stamp-checkbox').length;
+            selectAllEl.checked = selectedStamps.size === visibleStamps && visibleStamps > 0;
+            selectAllEl.indeterminate = selectedStamps.size > 0 && selectedStamps.size < visibleStamps;
+        }
+    }
+    
+    // Stamp details modal
+    function showStampDetails(stampId) {
+        const stamp = userCollection.find(s => s.userId === stampId);
+        if (!stamp) return;
+        
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        modal.onclick = (e) => {
+            if (e.target === modal) closeModal();
+        };
+        
+        const stampImage = stamp.userImage || stamp.image;
+        
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        ${stamp.country} ${stamp.denomination} (${stamp.year})
+                    </h2>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <img src="${stampImage}" alt="${stamp.country} stamp" 
+                                 class="w-full max-w-md mx-auto rounded-lg shadow-md"
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNTBMMTIwIDMwTDEwMCA1MEw4MCAzMEwxMDAgNTBaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K'">
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Basic Information</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Country</label>
+                                        <p class="text-gray-800">${stamp.country}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Year</label>
+                                        <p class="text-gray-800">${stamp.year}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Denomination</label>
+                                        <p class="text-gray-800">${stamp.denomination}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Catalog Number</label>
+                                        <p class="text-gray-800">${stamp.catalogNumber}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Condition & Value</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Rarity</label>
+                                        <p><span class="${getRarityClass(stamp.rarity)} px-3 py-1 rounded-full text-sm font-medium">
+                                            ${stamp.rarity.charAt(0).toUpperCase() + stamp.rarity.slice(1)}
+                                        </span></p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-600">Condition</label>
+                                        <p class="text-gray-800">${stamp.condition}</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="text-sm font-medium text-gray-600">Estimated Value</label>
+                                        <p class="text-lg font-bold text-green-600">${stamp.value}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Description</h3>
+                                <p class="text-gray-700 leading-relaxed">${stamp.description}</p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3">Collection Info</h3>
+                                <div class="text-sm text-gray-600">
+                                    <p>Added to collection: ${new Date(stamp.addedDate).toLocaleDateString()}</p>
+                                    <p>Stamp ID: ${stamp.userId}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-between items-center border-t pt-6">
+                        <button onclick="exportStamp('${stamp.userId}')" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-download mr-2"></i>Export Stamp
+                        </button>
+                        <button onclick="removeStamp('${stamp.userId}'); closeModal();" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-trash-alt mr-2"></i>Remove from Collection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Utility functions
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    window.closeModal = function() {
+        const modal = document.querySelector('.fixed.inset-0.bg-black');
+        if (modal) {
+            modal.remove();
+            document.body.style.overflow = 'auto';
+        }
+    };
+    
+    window.showStampDetails = showStampDetails;
+    
+    window.clearFilters = function() {
+        if (filterCountry) filterCountry.value = '';
+        if (filterRarity) filterRarity.value = '';
+        if (searchInput) searchInput.value = '';
+        updateCollectionDisplay();
+    };
+    
+    window.exportStamp = function(stampId) {
+        const stamp = userCollection.find(s => s.userId === stampId);
+        if (!stamp) return;
+        
+        const exportData = {
+            exportDate: new Date().toISOString(),
+            version: '1.0',
+            stamp: stamp
+        };
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileName = `StampExpert_${stamp.country}_${stamp.year}_${stamp.denomination.replace(/[^\w]/g, '')}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileName);
+        linkElement.click();
+        
+        showSuccessMessage('Stamp exported successfully!');
+    };
+    
+    window.batchDelete = function() {
+        if (selectedStamps.size === 0) return;
+        
+        if (confirm(`Are you sure you want to delete ${selectedStamps.size} selected stamps?`)) {
+            userCollection = userCollection.filter(stamp => !selectedStamps.has(stamp.userId));
+            selectedStamps.clear();
+            saveCollectionToStorage();
+            updateCollectionDisplay();
+            showSuccessMessage(`Successfully deleted ${selectedStamps.size} stamps.`);
+        }
+    };
+    
+    window.batchExport = function() {
+        if (selectedStamps.size === 0) return;
+        
+        const selectedStampData = userCollection.filter(stamp => selectedStamps.has(stamp.userId));
+        
+        const exportData = {
+            exportDate: new Date().toISOString(),
+            version: '1.0',
+            stamps: selectedStampData
+        };
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileName = `StampExpert_Batch_${new Date().toISOString().split('T')[0]}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileName);
+        linkElement.click();
+        
+        showSuccessMessage(`Successfully exported ${selectedStamps.size} stamps.`);
+    };
     
     // Global function to remove stamp
     window.removeStamp = function(userId) {
@@ -641,7 +1056,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize
     loadCollectionFromStorage();
+    loadWishlistFromStorage();
     updateCollectionDisplay();
+    initializeAnalytics();
+    initializeWishlist();
     
     // Add keyboard shortcuts
     document.addEventListener('keydown', function(e) {
@@ -664,5 +1082,369 @@ document.addEventListener('DOMContentLoaded', function() {
                 newAnalysisBtn.click();
             }
         }
+        // Ctrl+A for analytics
+        if (e.ctrlKey && e.key === 'a') {
+            e.preventDefault();
+            toggleAnalytics();
+        }
+        // Ctrl+W for wishlist
+        if (e.ctrlKey && e.key === 'w') {
+            e.preventDefault();
+            showWishlistModal();
+        }
     });
+
+    // ========== ADVANCED ANALYTICS FUNCTIONS ==========
+    
+    function initializeAnalytics() {
+        const toggleBtn = document.getElementById('toggleAnalytics');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', toggleAnalytics);
+        }
+    }
+    
+    function toggleAnalytics() {
+        const panel = document.getElementById('analyticsPanel');
+        if (!panel) return;
+        
+        const isHidden = panel.classList.contains('hidden');
+        
+        if (isHidden) {
+            panel.classList.remove('hidden');
+            updateAnalyticsDashboard();
+            document.getElementById('toggleAnalytics').innerHTML = '<i class="fas fa-chart-line mr-1"></i> Hide Analytics';
+        } else {
+            panel.classList.add('hidden');
+            document.getElementById('toggleAnalytics').innerHTML = '<i class="fas fa-chart-line mr-1"></i> View Analytics';
+        }
+    }
+    
+    function updateAnalyticsDashboard() {
+        updateValueDistribution();
+        updateCountryDistribution();
+        updateYearDistribution();
+        updateCollectionInsights();
+    }
+    
+    function updateValueDistribution() {
+        const valueRanges = {
+            'Under $50': 0,
+            '$50 - $200': 0,
+            '$200 - $500': 0,
+            '$500 - $1,000': 0,
+            '$1,000 - $5,000': 0,
+            'Over $5,000': 0
+        };
+        
+        userCollection.forEach(stamp => {
+            const value = getStampValue(stamp);
+            if (value < 50) valueRanges['Under $50']++;
+            else if (value < 200) valueRanges['$50 - $200']++;
+            else if (value < 500) valueRanges['$200 - $500']++;
+            else if (value < 1000) valueRanges['$500 - $1,000']++;
+            else if (value < 5000) valueRanges['$1,000 - $5,000']++;
+            else valueRanges['Over $5,000']++;
+        });
+        
+        const container = document.getElementById('valueDistribution');
+        if (container) {
+            const maxCount = Math.max(...Object.values(valueRanges));
+            container.innerHTML = Object.entries(valueRanges).map(([range, count]) => `
+                <div class="flex items-center justify-between py-2">
+                    <span class="text-sm font-medium text-gray-700">${range}</span>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-20 bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: ${maxCount > 0 ? (count / maxCount) * 100 : 0}%"></div>
+                        </div>
+                        <span class="text-sm text-gray-600 w-6 text-right">${count}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function updateCountryDistribution() {
+        const countryCounts = {};
+        userCollection.forEach(stamp => {
+            countryCounts[stamp.country] = (countryCounts[stamp.country] || 0) + 1;
+        });
+        
+        const sortedCountries = Object.entries(countryCounts)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5);
+        
+        const container = document.getElementById('countryDistribution');
+        if (container) {
+            const maxCount = sortedCountries.length > 0 ? sortedCountries[0][1] : 0;
+            container.innerHTML = sortedCountries.map(([country, count]) => `
+                <div class="flex items-center justify-between py-2">
+                    <span class="text-sm font-medium text-gray-700">${country}</span>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-20 bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${maxCount > 0 ? (count / maxCount) * 100 : 0}%"></div>
+                        </div>
+                        <span class="text-sm text-gray-600 w-6 text-right">${count}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function updateYearDistribution() {
+        const decades = {};
+        userCollection.forEach(stamp => {
+            const year = parseInt(stamp.year);
+            const decade = Math.floor(year / 10) * 10;
+            decades[decade] = (decades[decade] || 0) + 1;
+        });
+        
+        const container = document.getElementById('yearDistribution');
+        if (container) {
+            const sortedDecades = Object.entries(decades).sort(([a], [b]) => parseInt(a) - parseInt(b));
+            const maxCount = Math.max(...Object.values(decades));
+            
+            container.innerHTML = sortedDecades.map(([decade, count]) => `
+                <div class="flex flex-col items-center justify-end flex-1 mx-1">
+                    <div class="bg-purple-500 w-full rounded-t" style="height: ${maxCount > 0 ? (count / maxCount) * 100 : 0}px; min-height: 4px;"></div>
+                    <span class="text-xs text-gray-600 mt-1 transform -rotate-45 origin-bottom-left">${decade}s</span>
+                    <span class="text-xs font-medium text-gray-800">${count}</span>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function updateCollectionInsights() {
+        // Average value
+        const totalValue = userCollection.reduce((sum, stamp) => sum + getStampValue(stamp), 0);
+        const avgValue = userCollection.length > 0 ? totalValue / userCollection.length : 0;
+        const avgValueEl = document.getElementById('avgValue');
+        if (avgValueEl) {
+            avgValueEl.textContent = avgValue > 0 ? `$${Math.round(avgValue).toLocaleString()}` : '$0';
+        }
+        
+        // Oldest year
+        const years = userCollection.map(stamp => parseInt(stamp.year)).filter(year => !isNaN(year));
+        const oldestYear = years.length > 0 ? Math.min(...years) : null;
+        const oldestYearEl = document.getElementById('oldestYear');
+        if (oldestYearEl) {
+            oldestYearEl.textContent = oldestYear || '-';
+        }
+        
+        // Most common country
+        const countryCounts = {};
+        userCollection.forEach(stamp => {
+            countryCounts[stamp.country] = (countryCounts[stamp.country] || 0) + 1;
+        });
+        const mostCommonCountry = Object.entries(countryCounts).sort(([,a], [,b]) => b - a)[0];
+        const mostCommonCountryEl = document.getElementById('mostCommonCountry');
+        if (mostCommonCountryEl) {
+            mostCommonCountryEl.textContent = mostCommonCountry ? mostCommonCountry[0] : '-';
+        }
+        
+        // Rare percentage
+        const rareCount = userCollection.filter(stamp => 
+            ['rare', 'ultra-rare', 'legendary'].includes(stamp.rarity)
+        ).length;
+        const rarePercentage = userCollection.length > 0 ? (rareCount / userCollection.length) * 100 : 0;
+        const rarePercentageEl = document.getElementById('rarePercentage');
+        if (rarePercentageEl) {
+            rarePercentageEl.textContent = `${Math.round(rarePercentage)}%`;
+        }
+    }
+
+    // ========== WISHLIST FUNCTIONS ==========
+    
+    function initializeWishlist() {
+        const addBtn = document.getElementById('addToWishlistBtn');
+        const modal = document.getElementById('wishlistModal');
+        const closeBtn = document.getElementById('closeWishlistModal');
+        const cancelBtn = document.getElementById('cancelWishlist');
+        const form = document.getElementById('wishlistForm');
+        
+        if (addBtn) {
+            addBtn.addEventListener('click', showWishlistModal);
+        }
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', hideWishlistModal);
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', hideWishlistModal);
+        }
+        
+        if (form) {
+            form.addEventListener('submit', handleWishlistSubmit);
+        }
+        
+        updateWishlistDisplay();
+    }
+    
+    function showWishlistModal() {
+        const modal = document.getElementById('wishlistModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('wishCountry').focus();
+        }
+    }
+    
+    function hideWishlistModal() {
+        const modal = document.getElementById('wishlistModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('wishlistForm').reset();
+        }
+    }
+    
+    function handleWishlistSubmit(e) {
+        e.preventDefault();
+        
+        const wishItem = {
+            id: 'wish-' + Date.now(),
+            country: document.getElementById('wishCountry').value,
+            year: document.getElementById('wishYear').value,
+            description: document.getElementById('wishDescription').value,
+            maxPrice: parseFloat(document.getElementById('wishPrice').value) || null,
+            dateAdded: new Date().toISOString()
+        };
+        
+        userWishlist.push(wishItem);
+        saveWishlistToStorage();
+        updateWishlistDisplay();
+        hideWishlistModal();
+        showSuccessMessage('Added to wishlist!');
+    }
+    
+    function saveWishlistToStorage() {
+        try {
+            localStorage.setItem('stampWishlist', JSON.stringify(userWishlist));
+        } catch (error) {
+            console.error('Failed to save wishlist:', error);
+        }
+    }
+    
+    function loadWishlistFromStorage() {
+        try {
+            const saved = localStorage.getItem('stampWishlist');
+            if (saved) {
+                userWishlist = JSON.parse(saved);
+            }
+        } catch (error) {
+            console.error('Failed to load wishlist:', error);
+            userWishlist = [];
+        }
+    }
+    
+    function updateWishlistDisplay() {
+        const container = document.getElementById('wishlistItems');
+        const section = document.getElementById('wishlistSection');
+        
+        if (!container || !section) return;
+        
+        if (userCollection.length > 0) {
+            section.classList.remove('hidden');
+        }
+        
+        if (userWishlist.length === 0) {
+            container.innerHTML = `
+                <div class="bg-white rounded-lg p-4 shadow-sm border-2 border-dashed border-gray-300 text-center">
+                    <i class="fas fa-plus text-3xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-500">Add stamps you want to find</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = userWishlist.map(item => `
+            <div class="bg-white rounded-lg p-4 shadow-sm border">
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold text-gray-800">${item.country} ${item.year || ''}</h4>
+                    <button onclick="removeFromWishlist('${item.id}')" 
+                            class="text-red-500 hover:text-red-700 text-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">${item.description}</p>
+                ${item.maxPrice ? `<p class="text-sm font-medium text-green-600">Max: $${item.maxPrice}</p>` : ''}
+                <div class="flex justify-between items-center mt-3 pt-3 border-t text-xs text-gray-500">
+                    <span>Added ${new Date(item.dateAdded).toLocaleDateString()}</span>
+                    <button onclick="searchForWishlistItem('${item.country}', '${item.year}')"
+                            class="text-blue-600 hover:text-blue-800 font-medium">
+                        Search <i class="fas fa-search ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    window.removeFromWishlist = function(itemId) {
+        userWishlist = userWishlist.filter(item => item.id !== itemId);
+        saveWishlistToStorage();
+        updateWishlistDisplay();
+        showSuccessMessage('Removed from wishlist.');
+    };
+    
+    window.searchForWishlistItem = function(country, year) {
+        // Auto-populate search filters
+        if (filterCountry) filterCountry.value = country;
+        if (searchInput) searchInput.value = year;
+        
+        // Scroll to collection
+        document.getElementById('collectionContainer')?.scrollIntoView({ behavior: 'smooth' });
+        
+        // Update display with filters
+        updateCollectionDisplay();
+    };
+
+    // ========== ENHANCED COLLECTION DISPLAY ==========
+    
+    function updateCollectionDisplay() {
+        updateCollectionStats();
+        updateAnalyticsDashboard();
+        
+        if (userCollection.length === 0) {
+            emptyCollection.classList.remove('hidden');
+            stampCollection.classList.add('hidden');
+            document.getElementById('collectionStats').classList.add('hidden');
+            document.getElementById('wishlistSection')?.classList.add('hidden');
+            return;
+        }
+        
+        emptyCollection.classList.add('hidden');
+        stampCollection.classList.remove('hidden');
+        document.getElementById('collectionStats').classList.remove('hidden');
+        document.getElementById('wishlistSection')?.classList.remove('hidden');
+        
+        // Apply filters and search
+        let filteredCollection = applyFiltersAndSearch();
+        
+        // Apply sorting
+        filteredCollection = applySorting(filteredCollection);
+        
+        // Clear current display
+        stampCollection.innerHTML = '';
+        
+        // Check if we have results after filtering
+        if (filteredCollection.length === 0) {
+            stampCollection.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">No stamps match your current filters.</p>
+                    <button onclick="clearFilters()" class="mt-2 text-blue-600 hover:text-blue-800">Clear Filters</button>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render stamps based on view mode
+        if (viewMode === 'grid') {
+            renderGridView(filteredCollection);
+        } else {
+            renderListView(filteredCollection);
+        }
+        
+        updateWishlistDisplay();
+    }
 });
